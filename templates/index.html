@@ -1,0 +1,189 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+	<script>
+		window.onload = function () {
+
+			// Line Chart start
+			var dataPoints1 = [];
+			var dataPoints2 = [];
+
+			var chart = new CanvasJS.Chart("chartContainer", {
+				zoomEnabled: true,
+				// title: {
+				// 	text: "CPU and RAM utilization"
+				// },
+				// axisX: {
+				// 	title: "chart updates every sec"
+				// },
+				axisY: {
+					prefix: "",
+					includeZero: false
+				},
+				toolTip: {
+					shared: true
+				},
+				legend: {
+					cursor: "pointer",
+					verticalAlign: "top",
+					fontSize: 22,
+					fontColor: "dimGrey",
+					itemclick: toggleDataSeries
+				},
+				data: [{
+						type: "line",
+						xValueType: "dateTime",
+						// yValueFormatString: "####%",
+						xValueFormatString: "hh:mm:ss TT",
+						showInLegend: true,
+						name: "CPU",
+						dataPoints: dataPoints1
+					},
+					{
+						type: "line",
+						xValueType: "dateTime",
+						// yValueFormatString: "####%",
+						showInLegend: true,
+						name: "RAM",
+						dataPoints: dataPoints2
+					}
+				]
+			});
+
+			function toggleDataSeries(e) {
+				if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+					e.dataSeries.visible = false;
+				} else {
+					e.dataSeries.visible = true;
+				}
+				chart.render();
+			}
+
+			var updateInterval = 3000;
+			// initial value
+			var yValue1 = 0;
+			var yValue2 = 0;
+			var time = new Date;
+
+			// Line chart End
+
+			// Chart_Bar Start
+			var chart_bar = new CanvasJS.Chart("chartContainer1", {
+				// title: {
+				// 	text: "Temperature of Each Boiler"
+				// },
+				axisY: {
+					title: "Utilization",
+					suffix: " "
+				},
+				data: [{
+					type: "column",
+					yValueFormatString: "#,### °C",
+					indexLabel: "{y}",
+					dataPoints: [{
+							label: "boiler1",
+							y: 206
+						},
+						{
+							label: "boiler2",
+							y: 163
+						}
+					]
+				}]
+			});
+			// Chart_Bar End
+
+			function updateChart(count) {
+
+				// Line Chart Start
+				time.setTime(time.getTime() + updateInterval);
+				$.ajax({
+					url: "http://127.0.0.1:8000/get_metrics/",
+					dataType: "json",
+					success: function (data) {
+						yValue1 = data.cpu_percent;
+						yValue2 = data.ram_percent;
+					}
+				});
+				dataPoints1.push({
+					x: time.getTime(),
+					y: yValue1
+				});
+				dataPoints2.push({
+					x: time.getTime(),
+					y: yValue2
+				});
+				chart.options.data[0].legendText = " CPU  " + yValue1;
+				chart.options.data[1].legendText = " RAM  " + yValue2;
+				chart.render();
+				// Line Chart End
+
+				// Bar_Chart start
+				var cpu_color, ram_color ;
+				var dps = chart_bar.options.data[0].dataPoints;
+					cpu_color = yValue1 > 50 ? "#FF2500" : yValue1 >= 40 ? "#FF6000" : yValue1 < 20 ? "#6B8E23 " : null;
+					dps[0] = {
+						label: "CPU ",
+						y: yValue1,
+						color: cpu_color
+					};
+					ram_color = yValue2 > 50 ? "#FF2500" : yValue2 >= 40 ? "#FF6000" : yValue2 < 20 ? "#6B8E23 " : null;
+					dps[1] = {
+						label: "RAM ",
+						y: yValue2,
+						color: ram_color
+					};
+				// }
+				chart_bar.options.data[0].dataPoints = dps;
+				chart_bar.render();
+				// Chart_Bar End
+			};
+			
+			// generates first set of dataPoints 
+			updateChart(100);
+			setInterval(function () {
+				updateChart()
+			}, updateInterval);
+
+
+		}
+	</script>
+
+</head>
+
+<body>
+	<div class="container-fluid">
+		<div class="container">
+			<div class="card">
+				<div class="card-title text-center">
+				  <h2>CPU and RAM Utilization</h2>
+				</div>
+			  </div>
+		</div>
+		<div class="row pt-4">
+			<div class="col-6">
+				<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+			</div>
+			<div class="col-6">
+				<div id="chartContainer1" style="height: 300px;"></div>
+			</div>
+		</div>
+	</div>
+	
+
+	
+	<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</body>
+
+</html>
