@@ -37,12 +37,6 @@ def get_cpu_utilization(request):
         return Response({'cpu_percent':cpu_percent, 'ram_percent':ram_percent})
 
 def sendmail(request):
-    SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
-    EMAIL_HOST = 'smtp.sendgrid.net'
-    EMAIL_HOST_USER = 'apikey'
-    EMAIL_HOST_PASSWORD = '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'
-    EMAIL_PORT = 587
-    check = send_mail('Subject here', 'Here is the message.', 'from@example.com', ['vinodh17k@gmail.com'], fail_silently=False)
     if check :
         return HttpResponse('done')
     else:
