@@ -1,4 +1,4 @@
-sendgrid.env
+# sendgrid.env
 venv
 *.pyc
 staticfiles
