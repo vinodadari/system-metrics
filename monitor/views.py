@@ -37,6 +37,7 @@ def get_cpu_utilization(request):
         return Response({'cpu_percent':cpu_percent, 'ram_percent':ram_percent})
 
 def sendmail(request):
+    check = send_mail('Subject here', 'Here is the message.', 'from@example.com', ['vinodh17k@gmail.com'], fail_silently=False)
     if check :
         return HttpResponse('done')
     else:
