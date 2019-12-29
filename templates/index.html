@@ -123,7 +123,6 @@
 					if (add_sec == 10) {
 						$.ajax({
 							url: "{% url 'sendmail' %}",
-							dataType: "script",
 							success: function (data) {
 								$('#myModal').modal('show');
 							}
@@ -212,14 +211,14 @@
 		</div>
 		<div class="row">
 			<div class="col-md-6 pt-4">
-				<form method="POST" id="post-form">
+				<form method="POST" id="post-form" action="{% url 'add_subscriber' %}">
 					{% csrf_token %}
 					<div class="form-group">
 					  <label for="email">Add email to get notify for RAM over usage</label>
-					  <input type="email" class="form-control" placeholder="Enter email" id="email">
+					  <input type="email" name="mail" class="form-control" placeholder="Enter email" id="email">
 					</div>
 					
-					<button id="emailSubBtn" type="button" class="btn btn-primary">Subscribe</button>
+					<button type="submit" class="btn btn-primary">Subscribe</button>
 				  </form>
 			</div>
 			<div class="col-md-6 pt-5  text-center">
@@ -227,26 +226,6 @@
 			</div>
 		</div>
 	</div>
-
-	
-	<script>
-		$('body').on('click', '#emailSubBtn',function(e){
-		$.ajax({
-			type:'POST',
-			url:'{% url 'add_subscriber' %}',
-			data:{
-				mail:$('#email').val(),
-				csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
-			},
-			success:function(json){
-				console.log('json', json) ;
-			},
-			error : function(xhr,errmsg,err) {
-			console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
-		}
-		});
-	});
-	</script>
 	<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
 		integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">

@@ -17,15 +17,8 @@
   <div class="jumbotron text-center">
     <a href="{% url 'home' %}" class="btn btn-success">Go Home</a>
     <div class="container">
-      <h1>Subscribers</h1> 
-      {% if subscribers %}
-        {% for subscribers in subscribers %}
-          {{ subscribers.mail }} <br>
-        {% endfor %}
-
-      {% else %}
-         <p>Mails Not Added</p>
-      {% endif %}
+      <h1>Email already Existed <- OR -> InValid</h1> 
+      
 
     </div>
   </div>
