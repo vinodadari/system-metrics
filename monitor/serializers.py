@@ -1,8 +1,10 @@
-from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 
 from . import models
-
-class MetricsSerializer(serializers.ModelSerializer):
+ 
+class SubscriberSerializer(ModelSerializer):
     class Meta:
-        model = models.Metrics
+        model = models.Subscriber
         fields = '_all_'
+
+    

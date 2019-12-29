@@ -3,10 +3,11 @@
 
 <head>
 	<meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
@@ -102,18 +103,35 @@
 			});
 			// Chart_Bar End
 
+			// 10 secs check
+			var add_sec = 1;
+
 			function updateChart(count) {
 
 				// Line Chart Start
 				time.setTime(time.getTime() + updateInterval);
 				$.ajax({
-					url: "http://127.0.0.1:8000/get_metrics/",
+					url: "{% url 'get_metrics' %}",
 					dataType: "json",
 					success: function (data) {
 						yValue1 = data.cpu_percent;
 						yValue2 = data.ram_percent;
 					}
 				});
+				if (yValue2 > 50) {
+					add_sec += 1;
+					if (add_sec == 10) {
+						$.ajax({
+							url: "{% url 'sendmail' %}",
+							dataType: "script",
+							success: function (data) {
+								$('#myModal').modal('show');
+							}
+						});
+					}
+				} else {
+					add_sec = 1;
+				}
 				dataPoints1.push({
 					x: time.getTime(),
 					y: yValue1
@@ -128,26 +146,29 @@
 				// Line Chart End
 
 				// Bar_Chart start
-				var cpu_color, ram_color ;
+				var cpu_color, ram_color;
 				var dps = chart_bar.options.data[0].dataPoints;
-					cpu_color = yValue1 > 50 ? "#FF2500" : yValue1 >= 40 ? "#FF6000" : yValue1 < 20 ? "#6B8E23 " : null;
-					dps[0] = {
-						label: "CPU ",
-						y: yValue1,
-						color: cpu_color
-					};
-					ram_color = yValue2 > 50 ? "#FF2500" : yValue2 >= 40 ? "#FF6000" : yValue2 < 20 ? "#6B8E23 " : null;
-					dps[1] = {
-						label: "RAM ",
-						y: yValue2,
-						color: ram_color
-					};
+				cpu_color = yValue1 > 50 ? "#FF2500" : yValue1 >= 40 ? "#FF6000" : yValue1 < 20 ? "#6B8E23 " : null;
+				dps[0] = {
+					label: "CPU ",
+					y: yValue1,
+					color: cpu_color
+				};
+				ram_color = yValue2 > 50 ? "#FF2500" : yValue2 >= 40 ? "#FF6000" : yValue2 < 20 ? "#6B8E23 " : null;
+				dps[1] = {
+					label: "RAM ",
+					y: yValue2,
+					color: ram_color
+				};
 				// }
 				chart_bar.options.data[0].dataPoints = dps;
 				chart_bar.render();
 				// Chart_Bar End
+
+
+				$('#myModal').modal('hide');
 			};
-			
+
 			// generates first set of dataPoints 
 			updateChart(100);
 			setInterval(function () {
@@ -162,12 +183,24 @@
 
 <body>
 	<div class="container-fluid">
+
+		<!-- The Modal -->
+		<div class="modal" id="myModal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<!-- Modal Header -->
+					<div class="modal-header">
+						<h4 class="modal-title">Email alert has been sent</h4>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="container">
 			<div class="card">
 				<div class="card-title text-center">
-				  <h2>CPU and RAM Utilization</h2>
+					<h2>CPU and RAM Utilization</h2>
 				</div>
-			  </div>
+			</div>
 		</div>
 		<div class="row pt-4">
 			<div class="col-6">
@@ -177,12 +210,47 @@
 				<div id="chartContainer1" style="height: 300px;"></div>
 			</div>
 		</div>
+		<div class="row">
+			<div class="col-md-6 pt-4">
+				<form method="POST" id="post-form">
+					{% csrf_token %}
+					<div class="form-group">
+					  <label for="email">Add email to get notify for RAM over usage</label>
+					  <input type="email" class="form-control" placeholder="Enter email" id="email">
+					</div>
+					
+					<button id="emailSubBtn" type="button" class="btn btn-primary">Subscribe</button>
+				  </form>
+			</div>
+			<div class="col-md-6 pt-5  text-center">
+				<a href="{% url 'subscriber_list' %}" class="btn btn-success  text-center">subscribers list</a>
+			</div>
+		</div>
 	</div>
-	
 
 	
+	<script>
+		$('body').on('click', '#emailSubBtn',function(e){
+		$.ajax({
+			type:'POST',
+			url:'{% url 'add_subscriber' %}',
+			data:{
+				mail:$('#email').val(),
+				csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+			},
+			success:function(json){
+				console.log('json', json) ;
+			},
+			error : function(xhr,errmsg,err) {
+			console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+		}
+		});
+	});
+	</script>
 	<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+		integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
+	</script>
 
 </body>
 

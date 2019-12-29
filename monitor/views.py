@@ -1,16 +1,17 @@
 import psutil, os, platform, re
 import subprocess as k
 
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse
 from django.core.mail import send_mail
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
 
-from . import models
-
+from . serializers import SubscriberSerializer
+from . models import Subscriber
 def index(request):
     return render(request,'index.html')
 
@@ -37,8 +38,23 @@ def get_cpu_utilization(request):
         return Response({'cpu_percent':cpu_percent, 'ram_percent':ram_percent})
 
 def sendmail(request):
-    check = send_mail('Subject here', 'Here is the message.', 'mail@example.com', ['vinodh17k@gmail.com'], fail_silently=False)
+    check = send_mail('CPU Memory Low Alert', 'CPU usage more than 50%.', 'mail@example.com', ['vinodh17k@gmail.com'], fail_silently=False)
     if check :
         return HttpResponse('done')
     else:
         return HttpResponse('not done')
+
+def add_or_view_subscriber(request):
+   """ List all subscribers , or create a new subscriber. """
+
+   if request.method == 'GET':
+       subscribers = Subscriber.objects.all()
+       return render(request,'subscriber_list.html',context={'subscribers':subscribers})
+
+   elif request.method == 'POST':
+       data = JSONParser().parse(request)
+       serializer = SubscriberSerializer(data=data)
+       if serializer.is_valid():
+           serializer.save()
+
+

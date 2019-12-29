@@ -22,7 +22,9 @@ app_name = 'monitor'
 
 urlpatterns = [
     path('',views.index),
-    path('get_metrics/',views.get_cpu_utilization),
-    path('sendmail/',views.sendmail),
+    path('subscriber_list',views.add_or_view_subscriber,name="subscriber_list"),
+    path('add_subscriber/',views.add_or_view_subscriber,name="add_subscriber"),
+    path('get_metrics/',views.get_cpu_utilization,name="get_metrics"),
+    path('sendmail/',views.sendmail,name="sendmail"),
     path('admin/', admin.site.urls),
 ]
