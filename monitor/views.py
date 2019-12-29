@@ -24,8 +24,8 @@ def get_cpu_utilization(request):
     """ Fetching realtime CPU and RAM usage """
 
     if platform.system() == "Windows":
-        cpu_cmd = k.run(['wmic', 'cpu', 'get', 'loadpercentage'],capture_output=True)
-        cpu_percent = float(re.search(r'\d+',cpu_cmd.stdout.decode()).group())
+        cpu_cmd = "wmic cpu get loadpercentage /format:value"
+        cpu_percent = float(re.search(r'\d+',k.check_output(cpu_cmd).decode()).group())
         ram_percent = psutil.virtual_memory().percent
         return Response({'cpu_percent':cpu_percent, 'ram_percent':ram_percent})
     elif platform.system() == "Linux":
