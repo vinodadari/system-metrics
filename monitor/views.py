@@ -13,6 +13,7 @@ from . forms import SubscriberForm
 
 recievers = []
 def index(request):
+    """ Home page and auto added recievers while triggered for mail """
     for subscriber in Subscriber.objects.all():
         recievers.append(subscriber.mail)
     return render(request,'index.html')
@@ -20,6 +21,8 @@ def index(request):
 
 @api_view(['GET'])
 def get_cpu_utilization(request):
+    """ Fetching realtime CPU and RAM usage """
+
     if platform.system() == "Windows":
         cpu_cmd = k.run(['wmic', 'cpu', 'get', 'loadpercentage'],capture_output=True)
         cpu_percent = float(re.search(r'\d+',cpu_cmd.stdout.decode()).group())
@@ -30,11 +33,13 @@ def get_cpu_utilization(request):
         cpu_percent = str(os.popen(cpu_cmd).read())[:-2]
         ram_percent = psutil.virtual_memory().percent
         return Response({'cpu_percent':cpu_percent, 'ram_percent':ram_percent})
+
 def error_msg(request):
+    """ If error Occured then auto triggered this page """
     return render(request,'error_page.html')
 
 def sendmail(request):
-    
+    """ sending realtime notifications using sendgrid """
     check = send_mail('CPU Memory Low Alert', 'CPU usage more than 50%.', 'mail@example.com',recievers, fail_silently=False)
     if check:
         return HttpResponse('done')
