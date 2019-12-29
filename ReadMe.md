@@ -8,6 +8,6 @@ Adding to that, I have setup a system whenever the RAM Usage crosses 50% and is 
 
 Since, programs/libraries can be OS specific, I have written the code in such a way, it will run on both Windows and Unix OS Supported Machines and Servers.
 
-I have used python version 3.8 so, this project is version specific
+I have used python version 3.5+ so, this project is version specific
 
 ***And this work is solely compiled&programmed by myself (Vinodh Kumar Adari) with some help of online resources and third-party libraries.***
